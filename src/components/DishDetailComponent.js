@@ -1,7 +1,11 @@
-import React from 'react';
+import React, {Component} from 'react';
 import { Card, CardImg, CardText, CardBody,
-    CardTitle, Breadcrumb, BreadcrumbItem } from 'reactstrap';
+    CardTitle, Breadcrumb, BreadcrumbItem, Button, Modal, ModalHeader, ModalBody, Label, Row, Col} from 'reactstrap';
+import { Control, LocalForm, Errors } from 'react-redux-form';
 import { Link } from 'react-router-dom';
+
+const maxLength = (len) => (val) => !(val) || (val.length <= len);
+const minLength = (len) => (val) => val && (val.length >= len);
 
 function RenderDish ( {dish}) {
     return(
@@ -20,30 +24,93 @@ function RenderDish ( {dish}) {
     );
 }
     
-    function RenderComments ( {comments }) {
+    class RenderComments extends Component  {
+        constructor(props) {
+            super(props);
+            this.toggleModal = this.toggleModal.bind(this); 
+        ; 
+            this.state = {
+                isModalOpen: false
+            };
         
-        
+
+        }
+       toggleModal() {
+        this.setState({
+            isModalOpen: !this.state.isModalOpen
+        });
+        }
+        handleSubmit(values){
+            this.toggleModal();
+            console.log('Current State is: ' + JSON.stringify(values));
+            alert('Current State is: ' + JSON.stringify(values));
+            // event.preventDefault();
+            
+        }
+        render() {
           return ( 
             <div>
-                            <h4>Comments</h4>
+                <h4>Comments</h4>
                          
-                                {comments.map((x) => {
-              return (
-                  <div>
-                     <ul className="list-unstyled">
-                        <li key="x.id">
-                            <p>{x.comment}</p>
-                            <p> -- {x.author} , {new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit'}).format(new Date(Date.parse(x.date)))}</p>
-                        </li>
-                     </ul>
-                  </div>
-              );
-          }) }
-         
-                           
+                 {this.props.comments.map((x) => {
+                    return (
+                        <div>
+                            <ul className="list-unstyled">
+                                <li key="x.id">
+                                    <p>{x.comment}</p>
+                                    <p> -- {x.author} , {new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit'}).format(new Date(Date.parse(x.date)))}</p>
+                                </li>
+                            </ul>
+                        </div>
+                    );
+                }) }
+                <Button onClick={this.toggleModal}>Summit Comment</Button>
+                <Modal isOpen={this.state.isModalOpen} toggle={this.toggleModal}>
+                    <ModalHeader toggle={this.toggleModal}>Summit Comment</ModalHeader>
+                    <ModalBody>
+                        <LocalForm onSubmit={(values) => this.handleSubmit(values)}>
+                            <Row className="form-group">
+                                <Col>
+                            <Label htmlFor="rating">Rating</Label>
+                            <Control.select model=".rating" name="rating" className="form-control">
+                                <option value="1" selected>1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </Control.select>
+                            </Col>
+                            </Row>
+                            <Row className="form-group">
+                                <Col>
+                                <Label hrmlFor="author">Your Name</Label>
+                                <Control.text model=".author" id="author" name="author" placeholder="Your Name" className="form-control"
+                                validators={{maxLength: maxLength(15),minLength: minLength(2)}} />
+                                <Errors
+                                className="text-danger"
+                                model=".author"
+                                show="touched"
+                                messages={{
+                                    minLength: 'Must be greater than 2 characters',
+                                    maxLength: 'Must be 15 characters or less'
+                                }}
+                                />
+                                </Col>
+                            </Row>
+                            <Row className="form-group">
+                                <Col>
+                                <Label hrmlFor="comment">Comment</Label>
+                                <Control.textarea model=".comment" className="form-control" row="6"></Control.textarea>
+                                </Col>
+                            </Row>
+                            <Button type="submit" color="primary">Submit</Button>
+                        </LocalForm>
+                    </ModalBody>
+                </Modal>
             </div>
   
           );
+        }
         }
         
             
@@ -52,25 +119,25 @@ function RenderDish ( {dish}) {
         if(props.dish != null){
             return (
                 <div className="container">
-                <div className="row">
-                    <Breadcrumb>
+                    <div className="row">
+                        <Breadcrumb>
 
-                        <BreadcrumbItem><Link to="/menu">Menu</Link></BreadcrumbItem>
-                        <BreadcrumbItem active>{props.dish.name}</BreadcrumbItem>
-                    </Breadcrumb>
-                    <div className="col-12">
-                        <h3>{props.dish.name}</h3>
-                        <hr />
-                    </div>                
-                </div>
-                <div className="row">
-                    <div className="col-12 col-md-5 m-1">
-                        <RenderDish dish={props.dish} />
+                            <BreadcrumbItem><Link to="/menu">Menu</Link></BreadcrumbItem>
+                            <BreadcrumbItem active>{props.dish.name}</BreadcrumbItem>
+                        </Breadcrumb>
+                        <div className="col-12">
+                            <h3>{props.dish.name}</h3>
+                            <hr />
+                        </div>                
                     </div>
-                    <div className="col-12 col-md-5 m-1">
-                        <RenderComments comments={props.comments} />
+                    <div className="row">
+                        <div className="col-12 col-md-5 m-1">
+                            <RenderDish dish={props.dish} />
+                        </div>
+                        <div className="col-12 col-md-5 m-1">
+                            <RenderComments comments={props.comments} />
+                        </div>
                     </div>
-                </div>
                 </div>
             );
         }
