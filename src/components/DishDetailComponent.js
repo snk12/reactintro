@@ -42,8 +42,7 @@ function RenderDish ( {dish}) {
         }
         handleSubmit(values){
             this.toggleModal();
-            console.log('Current State is: ' + JSON.stringify(values));
-            alert('Current State is: ' + JSON.stringify(values));
+            this.props.addComment(this.props.dishId, values.rating, values.author, values.comment);
             // event.preventDefault();
             
         }
@@ -72,8 +71,8 @@ function RenderDish ( {dish}) {
                             <Row className="form-group">
                                 <Col>
                             <Label htmlFor="rating">Rating</Label>
-                            <Control.select model=".rating" name="rating" className="form-control">
-                                <option value="1" selected>1</option>
+                            <Control.select model=".rating" name="rating" id="rating" className="form-control" defaultValue="1">
+                                <option value="1">1</option>
                                 <option value="2">2</option>
                                 <option value="3">3</option>
                                 <option value="4">4</option>
@@ -135,7 +134,10 @@ function RenderDish ( {dish}) {
                             <RenderDish dish={props.dish} />
                         </div>
                         <div className="col-12 col-md-5 m-1">
-                            <RenderComments comments={props.comments} />
+                        <RenderComments comments={props.comments}
+        addComment={props.addComment}
+        dishId={props.dish.id}
+      />
                         </div>
                     </div>
                 </div>
